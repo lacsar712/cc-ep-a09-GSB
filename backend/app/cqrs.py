@@ -300,6 +300,32 @@ def abort_run(
     return proj
 
 
+def find_runs_by_metric(db: Session, metric_name: str) -> list[dict[str, Any]]:
+    """查询侧：按指标名精确匹配，返回所有记录过该指标的 Run。
+
+    每个 Run 一行，附带该 Run 内该指标最近一次记录的 value/step/recorded_at。
+    """
+    stmt = select(RunProjection).order_by(RunProjection.started_at.desc())
+    hits: list[dict[str, Any]] = []
+    for proj in db.scalars(stmt).all():
+        entries = [m for m in (proj.metrics_json or []) if m.get("name") == metric_name]
+        if not entries:
+            continue
+        latest = entries[-1]
+        hits.append(
+            {
+                "run_id": proj.id,
+                "project": proj.project,
+                "name": proj.name,
+                "status": proj.status,
+                "value": latest.get("value"),
+                "step": latest.get("step"),
+                "recorded_at": latest.get("recorded_at"),
+            }
+        )
+    return hits
+
+
 def list_events(db: Session, run_id: UUID) -> list[EventStore]:
     stmt = (
         select(EventStore)

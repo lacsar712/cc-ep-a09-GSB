@@ -71,6 +71,16 @@ class RunOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class MetricLookupItem(BaseModel):
+    run_id: UUID
+    project: str
+    name: str
+    status: str
+    value: float
+    step: int
+    recorded_at: datetime | None
+
+
 class EventOut(BaseModel):
     id: UUID
     aggregate_id: UUID

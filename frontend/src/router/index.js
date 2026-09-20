@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import RunListView from '../views/RunListView.vue'
 import RunCreateView from '../views/RunCreateView.vue'
 import RunDetailView from '../views/RunDetailView.vue'
+import MetricLookupView from '../views/MetricLookupView.vue'
 import EventTimelineView from '../views/EventTimelineView.vue'
 import LineageView from '../views/LineageView.vue'
 
@@ -13,6 +14,7 @@ const router = createRouter({
     { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
     { path: '/', redirect: '/runs' },
     { path: '/runs', name: 'runs', component: RunListView },
+    { path: '/metrics', name: 'metric-lookup', component: MetricLookupView },
     { path: '/runs/new', name: 'run-create', component: RunCreateView, meta: { researcher: true } },
     { path: '/runs/:id', name: 'run-detail', component: RunDetailView },
     { path: '/runs/:id/events', name: 'run-events', component: EventTimelineView },

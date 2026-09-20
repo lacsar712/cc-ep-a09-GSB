@@ -11,6 +11,7 @@ from app.cqrs import (
     abort_run,
     attach_artifact,
     complete_run,
+    find_runs_by_metric,
     list_events,
     record_metric,
     start_run,
@@ -24,6 +25,7 @@ from app.schemas import (
     EventOut,
     LineageOut,
     LoginRequest,
+    MetricLookupItem,
     RecordMetricCommand,
     RunOut,
     StartRunCommand,
@@ -68,6 +70,16 @@ def get_runs(
     if status:
         stmt = stmt.where(RunProjection.status == status)
     return list(db.scalars(stmt).all())
+
+
+@router.get("/metrics/lookup", response_model=list[MetricLookupItem])
+def lookup_metric(
+    name: str = Query(min_length=1, max_length=128),
+    db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user),
+):
+    """按指标名精确检索：列出所有记录过该指标的 Run（研究员与审计员均可查）。"""
+    return find_runs_by_metric(db, name)
 
 
 @router.post("/runs", response_model=RunOut, status_code=201)

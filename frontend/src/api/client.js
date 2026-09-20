@@ -37,6 +37,11 @@ export async function listRuns(params = {}) {
   return data
 }
 
+export async function lookupMetricRuns(name) {
+  const { data } = await api.get('/metrics/lookup', { params: { name } })
+  return data
+}
+
 export async function getRun(id) {
   const { data } = await api.get(`/runs/${id}`)
   return data

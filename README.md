@@ -62,8 +62,9 @@ pytest -q
 4. 在详情页记录指标、挂载产物，再 Complete（或 Abort）
 5. 打开「事件时间线」确认 version 递增的原始事件
 6. 打开「血缘」确认 code_commit、dataset 指纹、artifacts、metrics
-7. 健康检查：`GET http://localhost:8173/api/health`
-8. 用 `auditor` 登录：可看列表/事件/血缘，命令按钮不可用
+7. 打开「指标检索」，输入指标名（如 `tm_score`），列出记录过该指标的 Run（项目/名称/最近值/step），可点进详情；同一指标名出现在多条 Run 时结果为多行
+8. 健康检查：`GET http://localhost:8173/api/health`
+9. 用 `auditor` 登录：可看列表/指标检索/事件/血缘，命令按钮不可用
 
 终态或 `expected_version` 不匹配时，API 返回 **409**。
 
