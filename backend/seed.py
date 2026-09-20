@@ -135,12 +135,22 @@ def seed() -> None:
             description="进行中的增强 MSA 微调实验",
             run_id=UUID("33333333-3333-3333-3333-333333333333"),
         )
-        record_metric(
+        run3 = record_metric(
             db,
             run_id=run3.id,
             actor="researcher",
             name="loss",
             value=1.84,
+            step=10,
+            expected_version=run3.version,
+        )
+        # 同一指标名出现在多条 Run：tm_score 同时存在于 run1 与 run3
+        record_metric(
+            db,
+            run_id=run3.id,
+            actor="researcher",
+            name="tm_score",
+            value=0.68,
             step=10,
             expected_version=run3.version,
         )

@@ -13,6 +13,7 @@ from app.cqrs import (
     complete_run,
     list_events,
     record_metric,
+    search_runs_by_metric,
     start_run,
 )
 from app.database import get_db
@@ -24,6 +25,7 @@ from app.schemas import (
     EventOut,
     LineageOut,
     LoginRequest,
+    MetricSearchResult,
     RecordMetricCommand,
     RunOut,
     StartRunCommand,
@@ -182,6 +184,18 @@ def post_abort(
         )
     except DomainError as exc:
         _handle_domain(exc)
+
+
+@router.get("/metrics/search", response_model=list[MetricSearchResult])
+def search_metrics(
+    name: str = Query(min_length=1, max_length=128),
+    db: Session = Depends(get_db),
+    _user: dict = Depends(get_current_user),
+):
+    metric_name = name.strip()
+    if not metric_name:
+        return []
+    return search_runs_by_metric(db, metric_name)
 
 
 @router.get("/runs/{run_id}/events", response_model=list[EventOut])

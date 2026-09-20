@@ -71,6 +71,19 @@ class RunOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class MetricSearchResult(BaseModel):
+    run_id: UUID
+    project: str
+    name: str
+    status: str
+    metric_name: str
+    latest_value: float
+    latest_step: int
+    recorded_at: str | None
+    started_by: str
+    started_at: datetime
+
+
 class EventOut(BaseModel):
     id: UUID
     aggregate_id: UUID

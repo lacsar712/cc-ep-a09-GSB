@@ -309,6 +309,36 @@ def list_events(db: Session, run_id: UUID) -> list[EventStore]:
     return list(db.scalars(stmt).all())
 
 
+def search_runs_by_metric(db: Session, metric_name: str) -> list[dict[str, Any]]:
+    """查询侧：按指标名检索所有记录过该指标的 Run。
+
+    每条 Run 返回一行，取该指标最近一次记录的值与 step
+    （metrics_json 按记录顺序追加，末尾即最近一次）。
+    """
+    stmt = select(RunProjection).order_by(RunProjection.started_at.desc())
+    rows: list[dict[str, Any]] = []
+    for proj in db.scalars(stmt).all():
+        matches = [m for m in (proj.metrics_json or []) if m.get("name") == metric_name]
+        if not matches:
+            continue
+        latest = matches[-1]
+        rows.append(
+            {
+                "run_id": proj.id,
+                "project": proj.project,
+                "name": proj.name,
+                "status": proj.status,
+                "metric_name": metric_name,
+                "latest_value": latest.get("value"),
+                "latest_step": latest.get("step"),
+                "recorded_at": latest.get("recorded_at"),
+                "started_by": proj.started_by,
+                "started_at": proj.started_at,
+            }
+        )
+    return rows
+
+
 def rebuild_projection_from_events(db: Session, run_id: UUID) -> RunProjection | None:
     events = list_events(db, run_id)
     if not events:

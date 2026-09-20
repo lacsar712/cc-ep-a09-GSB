@@ -72,6 +72,11 @@ export async function getEvents(id) {
   return data
 }
 
+export async function searchRunsByMetric(name) {
+  const { data } = await api.get('/metrics/search', { params: { name } })
+  return data
+}
+
 export async function getLineage(id) {
   const { data } = await api.get(`/runs/${id}/lineage`)
   return data

@@ -58,12 +58,13 @@ pytest -q
 
 1. 打开 http://localhost:3173 ，使用 `researcher` / `lab123456` 登录
 2. 在 Run 列表看到 seed 数据（含进行中与已完成）
-3. 点击「新建 Run」，填写 project/name、dataset sha、code commit，启动
-4. 在详情页记录指标、挂载产物，再 Complete（或 Abort）
-5. 打开「事件时间线」确认 version 递增的原始事件
-6. 打开「血缘」确认 code_commit、dataset 指纹、artifacts、metrics
-7. 健康检查：`GET http://localhost:8173/api/health`
-8. 用 `auditor` 登录：可看列表/事件/血缘，命令按钮不可用
+3. 打开「指标检索」，输入种子中出现过的指标名（如 `tm_score`），应列出多条 Run 行（含项目、名称、最近值与 step），点击「详情」可进入对应 Run 详情页
+4. 点击「新建 Run」，填写 project/name、dataset sha、code commit，启动
+5. 在详情页记录指标、挂载产物，再 Complete（或 Abort）
+6. 打开「事件时间线」确认 version 递增的原始事件
+7. 打开「血缘」确认 code_commit、dataset 指纹、artifacts、metrics
+8. 健康检查：`GET http://localhost:8173/api/health`
+9. 用 `auditor` 登录：可看列表/指标检索/事件/血缘，命令按钮不可用
 
 终态或 `expected_version` 不匹配时，API 返回 **409**。
 

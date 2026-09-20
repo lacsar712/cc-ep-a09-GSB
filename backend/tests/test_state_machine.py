@@ -15,6 +15,7 @@ from app.cqrs import (
     list_events,
     rebuild_projection_from_events,
     record_metric,
+    search_runs_by_metric,
     start_run,
 )
 from app.database import Base
@@ -218,3 +219,85 @@ def test_cannot_command_before_start(db):
             step=0,
             expected_version=0,
         )
+
+
+def test_search_runs_by_metric(db):
+    run_a = start_run(
+        db,
+        actor="researcher",
+        project="p1",
+        name="n1",
+        dataset_content_sha256=sha("ds-a"),
+        code_commit_sha="abc1234",
+        description=None,
+    )
+    run_a = record_metric(
+        db,
+        run_id=run_a.id,
+        actor="researcher",
+        name="acc",
+        value=0.8,
+        step=1,
+        expected_version=run_a.version,
+    )
+    record_metric(
+        db,
+        run_id=run_a.id,
+        actor="researcher",
+        name="acc",
+        value=0.9,
+        step=2,
+        expected_version=run_a.version,
+    )
+
+    run_b = start_run(
+        db,
+        actor="researcher",
+        project="p2",
+        name="n2",
+        dataset_content_sha256=sha("ds-b"),
+        code_commit_sha="abc1234",
+        description=None,
+    )
+    record_metric(
+        db,
+        run_id=run_b.id,
+        actor="researcher",
+        name="acc",
+        value=0.7,
+        step=5,
+        expected_version=run_b.version,
+    )
+
+    run_c = start_run(
+        db,
+        actor="researcher",
+        project="p3",
+        name="n3",
+        dataset_content_sha256=sha("ds-c"),
+        code_commit_sha="abc1234",
+        description=None,
+    )
+    record_metric(
+        db,
+        run_id=run_c.id,
+        actor="researcher",
+        name="loss",
+        value=1.0,
+        step=1,
+        expected_version=run_c.version,
+    )
+
+    # 同一指标名出现在多条 Run → 多行；run_c 未记录 acc，不出现
+    rows = search_runs_by_metric(db, "acc")
+    assert len(rows) == 2
+    by_run = {r["run_id"]: r for r in rows}
+    assert by_run[run_a.id]["project"] == "p1"
+    assert by_run[run_a.id]["name"] == "n1"
+    # 取最近一次记录的值与 step
+    assert by_run[run_a.id]["latest_value"] == 0.9
+    assert by_run[run_a.id]["latest_step"] == 2
+    assert by_run[run_b.id]["latest_value"] == 0.7
+    assert by_run[run_b.id]["latest_step"] == 5
+
+    assert search_runs_by_metric(db, "missing") == []
